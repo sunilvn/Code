@@ -1,0 +1,74 @@
+package test;
+
+public class Builder {
+
+
+    public static void main(String[] args) {
+
+        Car car = CarBuilder.getBuilder()
+                .withA(1)
+                .withB(2)
+                .build();
+    }
+}
+
+
+class CarBuilder {
+    Car car;
+
+    static CarBuilder getBuilder() {
+        CarBuilder carBuilder = new CarBuilder();
+        carBuilder.car = new Car();
+        return carBuilder;
+    }
+
+    CarBuilder withA(int a) {
+        car.setA(a);
+        return this;
+    }
+
+    CarBuilder withB(int b) {
+        car.setB(b);
+        return this;
+    }
+
+    CarBuilder withC(int c) {
+        car.setC(c);
+        return this;
+    }
+
+    Car build() {
+        return car;
+    }
+
+}
+
+class Car {
+    private int a;
+    private int b;
+    private int c;
+
+    public int getA() {
+        return a;
+    }
+
+    public void setA(int a) {
+        this.a = a;
+    }
+
+    public int getB() {
+        return b;
+    }
+
+    public void setB(int b) {
+        this.b = b;
+    }
+
+    public int getC() {
+        return c;
+    }
+
+    public void setC(int c) {
+        this.c = c;
+    }
+}
