@@ -1,0 +1,87 @@
+package test;
+
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+public class Threadpool implements IThreadPoolService {
+
+    private final int size;
+    private final Queue<Runnable> queue = new LinkedBlockingQueue<>();
+    private final Worker[] workers;
+    private Boolean acceptNewTasks;
+
+    public Threadpool(int size) {
+        this.size = size;
+        this.acceptNewTasks = Boolean.TRUE;
+        workers = new Worker[size];
+        for (int i = 0; i < size; i++) {
+            workers[i] = new Worker();
+            workers[i].start();
+        }
+    }
+
+    @Override
+    public boolean offerTask(Runnable task) {
+
+        if (!this.acceptNewTasks) return false;
+        try {
+            synchronized (queue) {
+                queue.add(task);
+                queue.notify();
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public Object getOutput(Runnable task) {
+        return null;
+    }
+
+    @Override
+    public boolean shutDown() {
+        this.acceptNewTasks = Boolean.FALSE;
+        while (!queue.isEmpty()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        for (int i = 0; i < size; i++) {
+            while (!workers[i].getState().equals(Thread.State.WAITING)) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            workers[i].stop();
+        }
+        return true;
+    }
+
+    public class Worker extends Thread {
+
+        @Override
+        public void run() {
+            Runnable task;
+            while (true) {
+                synchronized (queue) {
+                    while (queue.isEmpty()) {
+                        try {
+                            queue.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    task = queue.poll();
+                }
+                task.run();
+            }
+        }
+    }
+
+}
