@@ -1,0 +1,10 @@
+package test;
+
+public interface IThreadPoolService {
+
+    boolean offerTask(Runnable task);
+
+    Object getOutput(Runnable task);
+
+    boolean shutDown();
+}
